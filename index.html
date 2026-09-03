@@ -1,1 +1,444 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hasil Penghitungan Ketang 43</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<style>
+  :root{
+    --paper: #f6f3ec;
+    --ink: #1c1a16;
+    --ink-soft: #55503f;
+    --line: #d8d1bd;
+    --gold: #a97a2f;
+    --gold-deep: #7c5a1f;
+    --green: #3c5c3e;
+    --card: #fffdf8;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html, body{
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Georgia', 'Iowan Old Style', 'Palatino Linotype', serif;
+  }
+
+  body{
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(169,122,47,0.05), transparent 45%),
+      radial-gradient(circle at 85% 92%, rgba(60,92,62,0.05), transparent 40%);
+  }
+
+  .wrap{
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 56px 24px 90px;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    text-align: center;
+    padding-bottom: 34px;
+    border-bottom: 3px double var(--gold-deep);
+    margin-bottom: 46px;
+    position: relative;
+  }
+
+  .seal{
+    width: 54px;
+    height: 54px;
+    margin: 0 auto 18px;
+    border: 2px solid var(--gold-deep);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Times New Roman', serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--gold-deep);
+    background: var(--card);
+  }
+
+  .kop{
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin: 0 0 6px;
+  }
+
+  h1{
+    font-size: clamp(28px, 4.4vw, 42px);
+    line-height: 1.15;
+    margin: 0 0 10px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--ink);
+  }
+
+  .sub{
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  .status-row{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 18px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+
+  .dot{
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 0 rgba(60,92,62,0.5);
+    animation: pulse 2.2s infinite;
+  }
+  .dot.off{ background: #a33; animation: none; }
+
+  @keyframes pulse{
+    0%{ box-shadow: 0 0 0 0 rgba(60,92,62,0.35); }
+    70%{ box-shadow: 0 0 0 7px rgba(60,92,62,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(60,92,62,0); }
+  }
+
+  /* ---------- Total suara masuk ---------- */
+  .total-banner{
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .total-banner .n{
+    font-size: 46px;
+    font-weight: 400;
+    color: var(--gold-deep);
+    font-variant-numeric: tabular-nums;
+  }
+  .total-banner .l{
+    font-size: 13px;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- Kandidat list ---------- */
+  .list{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .row{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 20px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.4s ease;
+  }
+
+  .row.leading{
+    border-color: var(--gold);
+    box-shadow: 0 2px 14px rgba(169,122,47,0.12);
+  }
+
+  .row-top{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+
+  .name-block{
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .kode{
+    font-family: 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--gold-deep);
+    flex-shrink: 0;
+  }
+
+  .nama{
+    font-size: 18px;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .crown{
+    font-size: 13px;
+    color: var(--gold-deep);
+    flex-shrink: 0;
+  }
+
+  .angka-block{
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .suara{
+    font-size: 22px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .persen{
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+
+  .bar-track{
+    width: 100%;
+    height: 6px;
+    background: #ece7d9;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .bar-fill{
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-deep), var(--gold));
+    width: 0%;
+    transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    border-radius: 3px;
+  }
+
+  .row.leading .bar-fill{
+    background: linear-gradient(90deg, var(--green), #56814f);
+  }
+
+  .rincian{
+    margin-top: 10px;
+    font-size: 11.5px;
+    color: #8a8471;
+    display: flex;
+    gap: 18px;
+  }
+
+  /* ---------- Footer ---------- */
+  footer{
+    margin-top: 56px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  footer .waktu{
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Loading / error state ---------- */
+  .msg-state{
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ink-soft);
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  @media (max-width: 480px){
+    .wrap{ padding: 40px 16px 70px; }
+    .nama{ font-size: 16px; }
+    .suara{ font-size: 19px; }
+    .row{ padding: 16px 18px; }
+    .rincian{ flex-direction: column; gap: 3px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <div class="seal">43</div>
+    <p class="kop">Panitia Pemilihan &middot; Angkatan 43</p>
+    <h1>Hasil Penghitungan Ketang 43</h1>
+    <p class="sub">Rekapitulasi suara langsung dari sistem pemungutan suara</p>
+    <div class="status-row">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">Menyambungkan ke server&hellip;</span>
+    </div>
+  </header>
+
+  <div class="total-banner">
+    <div class="n" id="totalSuara">&mdash;</div>
+    <div class="l">total suara masuk</div>
+  </div>
+
+  <div id="listArea">
+    <div class="msg-state">Memuat data suara&hellip;</div>
+  </div>
+
+  <footer>
+    Data disinkronkan dari dua basis data secara real-time &middot;
+    pembaruan terakhir <span class="waktu" id="waktuUpdate">&mdash;</span>
+  </footer>
+
+</div>
+
+<script>
+  const KANDIDAT = [
+    { kode: "X.1", nama: "Latry Amitasari" },
+    { kode: "X.2", nama: "Afifah Naufarizza Qotrun Nada" },
+    { kode: "X.3", nama: "Fazli Rasyad Ibrahim" },
+    { kode: "X.4", nama: "Mochammad Fito Arrosyid" },
+    { kode: "X.5", nama: "Keisha Citra Kirana" },
+    { kode: "X.6", nama: "Cut Zhevina Latysa Acbar" },
+  ];
+
+  const configA = {
+    apiKey: "AIzaSyBIDFyw7pCBJkRBowOdckbSYxmDX_98ZEc",
+    authDomain: "alternatif-d591b.firebaseapp.com",
+    databaseURL: "https://alternatif-d591b-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "alternatif-d591b",
+    storageBucket: "alternatif-d591b.firebasestorage.app",
+    messagingSenderId: "480324668238",
+    appId: "1:480324668238:web:c88d49d639232b377cac1f",
+    measurementId: "G-MFFCKYXQMR"
+  };
+
+  const configB = {
+    apiKey: "AIzaSyChdS_3saHCcB0QKHaWKMlpgZjZr7kPA2s",
+    authDomain: "angkatan43-49d17.firebaseapp.com",
+    databaseURL: "https://angkatan43-49d17-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "angkatan43-49d17",
+    storageBucket: "angkatan43-49d17.firebasestorage.app",
+    messagingSenderId: "684196514874",
+    appId: "1:684196514874:web:b17a594420233daf0b3903",
+    measurementId: "G-604ZTF99PF"
+  };
+
+  const appA = firebase.initializeApp(configA, "appA");
+  const appB = firebase.initializeApp(configB, "appB");
+  const dbA = appA.database();
+  const dbB = appB.database();
+
+  let votesA = {};
+  let votesB = {};
+  let gotA = false;
+  let gotB = false;
+  let connectionFailed = false;
+
+  const listArea = document.getElementById("listArea");
+  const totalSuaraEl = document.getElementById("totalSuara");
+  const statusDot = document.getElementById("statusDot");
+  const statusText = document.getElementById("statusText");
+  const waktuUpdate = document.getElementById("waktuUpdate");
+
+  function formatWaktu(){
+    const d = new Date();
+    return d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  }
+
+  function render(){
+    if (!gotA && !gotB) return;
+
+    const gabungan = KANDIDAT.map(k => {
+      const a = Number(votesA[k.kode]) || 0;
+      const b = Number(votesB[k.kode]) || 0;
+      return { ...k, suaraA: a, suaraB: b, total: a + b };
+    });
+
+    const totalKeseluruhan = gabungan.reduce((s, k) => s + k.total, 0);
+    const maxSuara = Math.max(...gabungan.map(k => k.total), 0);
+
+    totalSuaraEl.textContent = totalKeseluruhan.toLocaleString("id-ID");
+
+    const urutan = [...gabungan].sort((x, y) => y.total - x.total);
+
+    listArea.innerHTML = `<div class="list">${
+      urutan.map(k => {
+        const persen = totalKeseluruhan > 0 ? (k.total / totalKeseluruhan * 100) : 0;
+        const isLeading = k.total === maxSuara && maxSuara > 0;
+        return `
+          <div class="row ${isLeading ? "leading" : ""}">
+            <div class="row-top">
+              <div class="name-block">
+                <span class="kode">${k.kode}</span>
+                <span class="nama">${k.nama}</span>
+                ${isLeading ? '<span class="crown">&#9733;</span>' : ""}
+              </div>
+              <div class="angka-block">
+                <div class="suara">${k.total.toLocaleString("id-ID")}</div>
+                <div class="persen">${persen.toFixed(1)}%</div>
+              </div>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width:${persen}%"></div>
+            </div>
+            <div class="rincian">
+              <span>Basis data 1: ${k.suaraA.toLocaleString("id-ID")}</span>
+              <span>Basis data 2: ${k.suaraB.toLocaleString("id-ID")}</span>
+            </div>
+          </div>
+        `;
+      }).join("")
+    }</div>`;
+
+    waktuUpdate.textContent = formatWaktu();
+  }
+
+  function setStatus(connected){
+    if (connected){
+      statusDot.classList.remove("off");
+      statusText.textContent = "Terhubung \u2014 data diperbarui otomatis";
+    } else {
+      statusDot.classList.add("off");
+      statusText.textContent = "Koneksi terputus, mencoba menyambung ulang\u2026";
+    }
+  }
+
+  dbA.ref("votes").on("value", (snap) => {
+    votesA = snap.val() || {};
+    gotA = true;
+    setStatus(true);
+    render();
+  }, (err) => {
+    console.error("Gagal membaca basis data 1:", err);
+    connectionFailed = true;
+    setStatus(false);
+  });
+
+  dbB.ref("votes").on("value", (snap) => {
+    votesB = snap.val() || {};
+    gotB = true;
+    setStatus(true);
+    render();
+  }, (err) => {
+    console.error("Gagal membaca basis data 2:", err);
+    connectionFailed = true;
+    setStatus(false);
+  });
+
+  setTimeout(() => {
+    if (!gotA && !gotB){
+      listArea.innerHTML = '<div class="msg-state">Belum ada data yang diterima. Periksa kembali koneksi atau struktur data di Firebase.</div>';
+    }
+  }, 8000);
+</script>
+
+</body>
+</html>
 
